@@ -8,19 +8,19 @@
 # MAGIC %sql
 # MAGIC INSERT INTO employees
 # MAGIC VALUES
-# MAGIC   
-
-# COMMAND ----------
-
-# MAGIC %sql
-# MAGIC INSERT INTO employees
-# MAGIC VALUES
 # MAGIC   (1, "Adam", 3500.0),
 # MAGIC   (2, "Sarah", 4020.5),
 # MAGIC   (3, "John", 2999.3),
 # MAGIC   (4, "Thomas", 4000.3),
 # MAGIC   (5, "Anna", 2500.0),
 # MAGIC   (6, "Kim", 6200.3);
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC INSERT INTO employees
+# MAGIC VALUES
+# MAGIC   
 
 # COMMAND ----------
 
