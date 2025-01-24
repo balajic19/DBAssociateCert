@@ -29,7 +29,7 @@ SET datasets.path=dbfs:/mnt/DE-Associate/datasets/school;
 
 -- COMMAND ----------
 
-CREATE ____________________
+CREATE OR REFRESH STREAMING LIVE TABLE enrollments_bronze
 AS SELECT * FROM cloud_files("${datasets.path}/enrollments-json-raw", "json",
                              map("cloudFiles.inferColumnTypes", "true"))
 
@@ -40,7 +40,7 @@ AS SELECT * FROM cloud_files("${datasets.path}/enrollments-json-raw", "json",
 
 -- COMMAND ----------
 
-CREATE ____________________
+CREATE OR REFRESH LIVE TABLE students_bronze
 AS SELECT * FROM json.`${datasets.path}/students-json`
 
 -- COMMAND ----------
@@ -65,10 +65,10 @@ AS SELECT * FROM json.`${datasets.path}/students-json`
 -- COMMAND ----------
 
 CREATE OR REFRESH STREAMING LIVE TABLE enrollments_cleaned
-  (CONSTRAINT ____________________ ON VIOLATION ____________________ )
+  (CONSTRAINT email_const EXPECT(email IS NOT NULL) ON VIOLATION DROP ROW )
 AS SELECT enroll_id, total, email, profile:address:country as country
-  FROM ____________________ n
-  INNER ____________________ s
+  FROM STREAM(LIVE.enrollments_bronze) n
+  INNER JOIN LIVE.students_bronze s
     ON n.student_id = s.student_id
 
 -- COMMAND ----------
@@ -85,8 +85,10 @@ AS SELECT enroll_id, total, email, profile:address:country as country
 -- COMMAND ----------
 
 CREATE OR REFRESH LIVE TABLE course_sales_per_country
-  COMMENT ____________________
-AS SELECT ____________________
+  COMMENT "Course Sales Per Country"
+AS SELECT country, COUNT(enroll_id) AS enrollments_count, sum(total) AS enrollments_amount
+FROM LIVE.enrollments_cleaned
+GROUP BY country
 
 
 -- COMMAND ----------
@@ -111,6 +113,7 @@ AS SELECT ____________________
 -- MAGIC | Workers | Enter **0**|
 -- MAGIC | Photon Acceleration | Leave it unchecked |
 -- MAGIC | Advanced Configuration | Click **Add Configuration** and enter:<br> - Key: **datasets.path** <br> - Value: **dbfs:/mnt/DE-Associate/datasets/school** |
+-- MAGIC | Advanced Configuration | Click **Add Configuration** and enter:<br> - Key: **pipelines.clusterShutdown.delay** <br> - Value: **2s** |
 -- MAGIC | Channel | Choose **Current**|
 -- MAGIC
 -- MAGIC Finally, click **Create**.
